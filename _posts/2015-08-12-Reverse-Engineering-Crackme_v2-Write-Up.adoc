@@ -133,4 +133,8 @@ int main(int argc, char *argv[]) {
 }
 ....
 
+Let's see if it works:
+
 image::http://i.imgur.com/X2l3uYB.png[]
+
+Ta-daar! That's a success.
