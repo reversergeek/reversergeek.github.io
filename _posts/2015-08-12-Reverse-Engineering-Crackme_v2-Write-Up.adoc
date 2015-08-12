@@ -21,8 +21,7 @@ image::http://imgur.com/UdRo9CK.png[]
 
 image::http://imgur.com/usthcIT.png[]
 
-
-You can see in the image above (still in the main function, just scrolled down a little) that this crackme's has only one conditional branch that leads to either `"Error :: Not a correct Serial\n" and "Correct :: Good Work\n"`.
+You can see in the image above (still in the main function, just scrolled down a little) that this crackme's has only one conditional branch that leads to either ``"Error : : Not a correct Serial\n"` and `"Correct : : Good Work\n"`.
 
 
 The code leading up the `cmp` and `jmp` that make that conditional branch will be the algorithem that checks to see if the serial and name are correct. Let's have a look at it, shall we:
@@ -36,7 +35,7 @@ mov     [esp], eax      ; char *
 call    _strlen
 ....
 
-Next the length is multiplied by `0x875CD` (554445d) and again by `0x51eb851f` (1374389535d) but this time the result goes into the EDX:EAX register pair.  `eax` is them moved into `edx`, nulling the least significant half of the quad word, effectively dividing by `0x64` which is 2**32:
+Next the length is multiplied by `0x875CD` (554445d) and again by `0x51eb851f` (1374389535d) but this time the result goes into the `edx:edx` register pair.  `eax` is them moved into `edx`, nulling the least significant half of the quad word, effectively dividing by `0x64` which is 2**32:
 
 ....
 mov     edx, eax
