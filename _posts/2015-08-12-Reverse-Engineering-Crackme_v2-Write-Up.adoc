@@ -8,7 +8,7 @@ image::http://imgur.com/GrpOB7j.png[]
 
 The readme.txt file tells us that the crackme is written in C++ and our goal is to write a keygen, not patch the software.
 
-A quick PeID scan detects no packer/crypter signatures.
+A quick PEiD scan detects no packer/crypter signatures.
 
 image::http://imgur.com/z9tJiMs.png[]
 
