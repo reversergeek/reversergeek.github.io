@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
     double serial_number;
 	
     cout << "name: ";
-    cin >> setw(sizeof name) >> name;
+    cin >> setw((sizeof name)-1) >> name;
 	
     serial_number = (long double)(-880 * (554445 * strlen(name) / 0x64));
 	
