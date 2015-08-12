@@ -127,7 +127,6 @@ int main(int argc, char *argv[]) {
     serial_number = (long double)(-880 * (554445 * strlen(name) / 0x64));
 	
     printf("%i-x019871\n", serial_number);
-    //cout << "Hellow world" << endl;
 	
     system("pause");
     return 0;
