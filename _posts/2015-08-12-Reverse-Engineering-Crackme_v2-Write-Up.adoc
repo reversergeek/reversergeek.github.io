@@ -133,4 +133,4 @@ int main(int argc, char *argv[]) {
 }
 ....
 
-image::http://imgur.com/4vwOHxY.png[]
+image::http://i.imgur.com/X2l3uYB.png[]
