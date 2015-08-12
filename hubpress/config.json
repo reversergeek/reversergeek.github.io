@@ -1,10 +1,10 @@
 {
   "meta": {
     "username": "reversergeek",
-    "repositoryName": "portfolio",
+    "repositoryName": "reversergeek.github.io",
     "branch": "master"
   },
   "theme": {
-    "name": "reversergeek.github.io"
+    "name": "Casper"
   }
 }
