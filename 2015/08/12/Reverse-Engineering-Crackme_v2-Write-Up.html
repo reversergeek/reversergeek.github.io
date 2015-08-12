@@ -23,7 +23,7 @@
     <meta property="og:description" content="First Impressions: A quick run of the program shows us that it&amp;#8217;s a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. The readme.txt file tells us that the crackme is..." />
     <meta property="og:url" content="https://reversergeek.github.io/2015/08/12/Reverse-Engineering-Crackme_v2-Write-Up.html" />
     <meta property="article:published_time" content="2015-08-11T23:00:00.000Z" />
-    <meta property="article:modified_time" content="2015-08-12T16:18:56.990Z" />
+    <meta property="article:modified_time" content="2015-08-12T16:25:36.257Z" />
     
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Reverse Engineering Crackme_v2 Write Up." />
@@ -43,7 +43,7 @@
     "headline": "Reverse Engineering Crackme_v2 Write Up.",
     "url": "https://reversergeek.github.io/2015/08/12/Reverse-Engineering-Crackme_v2-Write-Up.html",
     "datePublished": "2015-08-11T23:00:00.000Z",
-    "dateModified": "2015-08-12T16:18:56.990Z",
+    "dateModified": "2015-08-12T16:25:36.257Z",
     "description": "First Impressions: A quick run of the program shows us that it&amp;#8217;s a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. The readme.txt file tells us that the crackme is..."
 }
     </script>
@@ -113,13 +113,8 @@
 <img src="http://imgur.com/usthcIT.png" alt="usthcIT.png">
 </div>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">You can see in the image above (still in the main function, just scrolled down a little) that this crackme&#8217;s has only one conditional branch that leads to either `"Error :: Not a correct Serial\n" and "Correct </dt>
-<dd>
-<p>Good Work\n"`.</p>
-</dd>
-</dl>
+<div class="paragraph">
+<p>You can see in the image above (still in the main function, just scrolled down a little) that this crackme&#8217;s has only one conditional branch that leads to either <code>`"Error : : Not a correct Serial\n"</code> and <code>"Correct : : Good Work\n"</code>.</p>
 </div>
 <div class="paragraph">
 <p>The code leading up the <code>cmp</code> and <code>jmp</code> that make that conditional branch will be the algorithem that checks to see if the serial and name are correct. Let&#8217;s have a look at it, shall we:</p>
@@ -135,7 +130,7 @@ call    _strlen</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Next the length is multiplied by <code>0x875CD</code> (554445d) and again by <code>0x51eb851f</code> (1374389535d) but this time the result goes into the EDX:EAX register pair.  <code>eax</code> is them moved into <code>edx</code>, nulling the least significant half of the quad word, effectively dividing by <code>0x64</code> which is 2**32:</p>
+<p>Next the length is multiplied by <code>0x875CD</code> (554445d) and again by <code>0x51eb851f</code> (1374389535d) but this time the result goes into the <code>edx:edx</code> register pair.  <code>eax</code> is them moved into <code>edx</code>, nulling the least significant half of the quad word, effectively dividing by <code>0x64</code> which is 2**32:</p>
 </div>
 <div class="literalblock">
 <div class="content">
