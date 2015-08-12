@@ -1,5 +1,7 @@
 = Reverse Engineering Crackme_v2 Write Up.
 
+Crackmes are free, reverse engineering challanges made by reversers for others practice their skill. They're also a great way to demonstrate skill for a portfolio.
+
 === First Impressions:
 
 A quick run of the program shows us that it's a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. 
