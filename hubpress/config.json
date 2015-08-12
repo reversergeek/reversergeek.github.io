@@ -1,10 +1,1 @@
-{
-  "meta": {
-    "username": "reversergeek",
-    "repositoryName": "reversergeek.github.io",
-    "branch": "master"
-  },
-  "theme": {
-    "name": "Casper"
-  }
-}
+{"meta":{"username":"reversergeek","repositoryName":"reversergeek.github.io","branch":"master"},"site":{"title":"Reverser Geek - A Geek's Reverse Engineering Portfolio.","description":"Hi! I'm Reverser Geek. I love IT, especially reverse engineering and I hope that the articles on this blog demonstrate that I have the skills to do exactly what you're looking for.\n\nCan't wait to work for you.\n\nRegards.\n\n","url":"https://reversergeek.github.io"},"socialnetwork":{},"theme":{"name":"Casper","url":"//reversergeek.github.io/themes/Casper"}}
