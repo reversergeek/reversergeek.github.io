@@ -1,6 +1,6 @@
 = Reverse Engineering Crackme_v2 Write Up.
 
-Crackmes are free, reverse engineering challanges made by reversers for others practice their skill. They're also a great way to demonstrate skill for a portfolio.
+Crackmes are free, reverse engineering challenges made by reversers for others practice their skill. They're also a great way to demonstrate skill for a portfolio.
 
 === First Impressions:
 
@@ -15,18 +15,18 @@ A quick PEiD scan detects no packer/crypter signatures.
 image::http://imgur.com/z9tJiMs.png[]
 
 
-Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being comming from std:cin being stored in `var_108` and `var_208` respectivley. I'll rename those variables `szName` and `szSerial`.
+Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being coming from std:cin being stored in `var_108` and `var_208` respectively. I'll rename those variables `szName` and `szSerial`.
 
 image::http://imgur.com/UdRo9CK.png[]
 
-=== Reverse Engineering Serial Checking Algorithem:
+=== Reverse Engineering Serial Checking Algorithm:
 
 image::http://imgur.com/usthcIT.png[]
 
 You can see in the image above (still in the main function, just scrolled down a little) that this crackme's has only one conditional branch that leads to either ``"Error : : Not a correct Serial\n"` and `"Correct : : Good Work\n"`.
 
 
-The code leading up the `cmp` and `jmp` that make that conditional branch will be the algorithem that checks to see if the serial and name are correct. Let's have a look at it, shall we:
+The code leading up the `cmp` and `jmp` that make that conditional branch will be the algorithm that checks to see if the serial and name are correct. Let's have a look at it, shall we:
 
 
 First the length of `szName` is determined with `strlen()`:
@@ -106,7 +106,7 @@ can simplify the equation into:
 ((strlen(name) * 554445  / 100) * -880)
 ....
 
-And there's our keygen algorithem. We could just get the output of sprintf or type up a keygen in our language of choosing.
+And there's our keygen algorithm. We could just get the output of sprintf or type up a keygen in our language of choosing.
 
 ....
 #include <iostream>
