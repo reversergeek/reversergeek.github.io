@@ -23,7 +23,7 @@
     <meta property="og:description" content="Crackmes are free, reverse engineering challenges made by reversers for others practice their skill. They&amp;#8217;re also a great way to demonstrate skill for a portfolio. First Impressions: A quick run of the program shows us that it&amp;#8217;..." />
     <meta property="og:url" content="https://reversergeek.github.io/2015/08/12/Reverse-Engineering-Crackme_v2-Write-Up.html" />
     <meta property="article:published_time" content="2015-08-11T23:00:00.000Z" />
-    <meta property="article:modified_time" content="2015-08-12T16:46:05.928Z" />
+    <meta property="article:modified_time" content="2015-08-12T16:51:31.945Z" />
     
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Reverse Engineering Crackme_v2 Write Up." />
@@ -43,7 +43,7 @@
     "headline": "Reverse Engineering Crackme_v2 Write Up.",
     "url": "https://reversergeek.github.io/2015/08/12/Reverse-Engineering-Crackme_v2-Write-Up.html",
     "datePublished": "2015-08-11T23:00:00.000Z",
-    "dateModified": "2015-08-12T16:46:05.928Z",
+    "dateModified": "2015-08-12T16:51:31.945Z",
     "description": "Crackmes are free, reverse engineering challenges made by reversers for others practice their skill. They&amp;#8217;re also a great way to demonstrate skill for a portfolio. First Impressions: A quick run of the program shows us that it&amp;#8217;..."
 }
     </script>
@@ -105,7 +105,7 @@
 </div>
 </div>
 <div class="paragraph">
-<p>Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being coming from std:cin being stored in <code>var_108</code> and <code>var_208</code> respectively. I&#8217;ll rename those variables <code>szName</code> and <code>szSerial</code>.</p>
+<p>Opening in IDA shows us code with the same strings that we saw in the command line being passed to <code>std:cout</code> and name and serial, coming from <code>std:cin</code>, being stored in <code>var_108</code> and <code>var_208</code> respectively. I&#8217;ll rename those variables <code>szName</code> and <code>szSerial</code>.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -121,10 +121,10 @@
 </div>
 </div>
 <div class="paragraph">
-<p>You can see in the image above (still in the main function, just scrolled down a little) that this crackme&#8217;s has only one conditional branch that leads to either <code>`"Error : : Not a correct Serial\n"</code> and <code>"Correct : : Good Work\n"</code>.</p>
+<p>You can see in the image above (still in the main function, just scrolled down a little) that this crackme has only one conditional branch that leads to either <code>`"Error : : Not a correct Serial\n"</code> or <code>"Correct : : Good Work\n"</code>.</p>
 </div>
 <div class="paragraph">
-<p>The code leading up the <code>cmp</code> and <code>jmp</code> that make that conditional branch will be the algorithm that checks to see if the serial and name are correct. Let&#8217;s have a look at it, shall we:</p>
+<p>The code leading up the <code>jmp</code> that make that conditional branch will be the algorithm that checks to see if the serial and name are correct. Let&#8217;s have a look at it, shall we:</p>
 </div>
 <div class="paragraph">
 <p>First the length of <code>szName</code> is determined with <code>strlen()</code>:</p>
@@ -157,7 +157,7 @@ mov     eax, edx</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then multiplication by <code>0x0FFFFFC90</code> which is -880d:</p>
+<p>Then multiply by <code>0x0FFFFFC90</code> which is -880d:</p>
 </div>
 <div class="literalblock">
 <div class="content">
