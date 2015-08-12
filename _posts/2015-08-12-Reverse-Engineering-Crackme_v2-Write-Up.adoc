@@ -15,7 +15,7 @@ A PEiD scan detects no packer/crypter signatures.
 image::http://imgur.com/z9tJiMs.png[]
 
 
-Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being coming from std:cin being stored in `var_108` and `var_208` respectively. I'll rename those variables `szName` and `szSerial`.
+Opening in IDA shows us code with the same strings that we saw in the command line being passed to `std:cout` and name and serial, coming from `std:cin`, being stored in `var_108` and `var_208` respectively. I'll rename those variables `szName` and `szSerial`.
 
 image::http://imgur.com/UdRo9CK.png[]
 
@@ -23,10 +23,10 @@ image::http://imgur.com/UdRo9CK.png[]
 
 image::http://imgur.com/usthcIT.png[]
 
-You can see in the image above (still in the main function, just scrolled down a little) that this crackme's has only one conditional branch that leads to either ``"Error : : Not a correct Serial\n"` and `"Correct : : Good Work\n"`.
+You can see in the image above (still in the main function, just scrolled down a little) that this crackme has only one conditional branch that leads to either ``"Error : : Not a correct Serial\n"` or `"Correct : : Good Work\n"`.
 
 
-The code leading up the `cmp` and `jmp` that make that conditional branch will be the algorithm that checks to see if the serial and name are correct. Let's have a look at it, shall we:
+The code leading up the `jmp` that make that conditional branch will be the algorithm that checks to see if the serial and name are correct. Let's have a look at it, shall we:
 
 
 First the length of `szName` is determined with `strlen()`:
@@ -53,7 +53,7 @@ Shift right is used to divide by 2**5, ie 32:
 shr     eax, 5
 ....
 
-Then multiplication by `0x0FFFFFC90` which is -880d:
+Then multiply by `0x0FFFFFC90` which is -880d:
 
 ....
 imul    eax, 0FFFFFC90h
