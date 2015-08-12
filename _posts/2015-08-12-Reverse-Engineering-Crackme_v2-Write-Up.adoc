@@ -1,0 +1,129 @@
+= Reverse Engineering Crackme_v2 Write Up.
+
+=== First Impressions:
+
+A quick run of the program shows us that it's a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. 
+
+image::http://imgur.com/GrpOB7j[]
+
+The readme.txt file tells us that the crackme is written in C++ and our goal is to write a keygen, not patch the software.
+
+A quick PeID scan detects no packer/crypter signatures.
+
+image::http://imgur.com/usthcIT[]
+
+Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being comming from std:cin being stored in var_108 and var_208 respectivley. I'll rename those variables szName and szSerial.
+
+image::http://imgur.com/UdRo9CK[]
+
+=== Reverse Engineering Serial Checking Algorithem:
+
+image::http://imgur.com/z9tJiMs[]
+
+
+You can see in the image above (still in the main function, just scrolled down a little) that this crackme's has only one conditional branch that leads to either "Error :: Not a correct Serial\n" and "Correct :: Good Work\n".
+
+
+The code leading up the cmp and jmp that make that conditional branch will be the algorithem that checks to see if the serial and name are correct. Let's have a look at it, shall we:
+
+
+First the length of szName is determined with strlen():
+
+...
+lea     eax, [ebp+szName]
+mov     [esp], eax      ; char *
+call    _strlen
+...
+
+Next the length is multiplied by 0x875CD (554445d) and again by 0x51eb851f (1374389535d) but this time the result goes into the EDX:EAX register pair.  EAX is them moved into EDX, nulling the least significant half of the quad word, effectively dividing by 0x64 which is 2**32:
+
+...
+mov     edx, eax
+imul    edx, 875CDh
+mov     eax, 51EB851Fh
+mul     edx
+mov     eax, edx
+...
+
+Shift right is used to divide by 2**5, ie 32:
+
+...
+shr     eax, 5
+...
+
+Then multiplication by 0x0FFFFFC90 which is -880d:
+
+...
+imul    eax, 0FFFFFC90h
+...
+
+Next _sprintf is used to convert the floating point into a string with "-x019871" appended to it. Eg: -50.0 becomes "-50-x019871". This is what the serial needs to be. If you were stepping though with a debugger then you would see desired serial in var_308.
+
+...
+mov     edx, 0
+push    edx
+push    eax
+fild    qword ptr [esp]
+lea     esp, [esp+8]
+fstp    [ebp+var_410]
+fld     [ebp+var_410]
+fstp    qword ptr [esp+8]
+mov     dword ptr [esp+4], offset aIX019871 ; "%i-x019871"
+lea     eax, [ebp+var_308]
+mov     [esp], eax      ; char *
+call    _sprintf
+...
+
+...
+lea     eax, [ebp+var_308]
+mov     [esp+4], eax    ; char *
+lea     eax, [ebp+szSerial]
+mov     [esp], eax      ; char *
+call    _strcmp
+mov     [ebp+var_414], eax
+cmp     [ebp+var_414], 0
+jz      short loc_401719
+...
+
+Putting that all together we get the following equation:
+...
+int2str(((((strlen(name) * 554445) * 1374389535 ) /(2**32)) /32 ) * -880) + "-x019871"
+...
+A bit of maths...
+
+...
+1374389535/(2**32)/32
+=1/100
+...
+can simplify the equation into: 
+
+...
+((strlen(name) * 554445  / 100) * -880)
+...
+And there's our keygen algorithem. We could just get the output of sprintf or type up a keygen in our language of choosing.
+
+...
+#include <iostream>
+#include <iomanip>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+using namespace std;
+
+int main(int argc, char *argv[]) {
+	char name[100];
+	double serial_number;
+	
+	cout << "name: ";
+    cin >> setw(sizeof name) >> name;
+	
+	serial_number = (long double)(-880 * (554445 * strlen(name) / 0x64));
+	
+	printf("%i-x019871\n", serial_number);
+	//cout << "Hellow world" << endl;
+	
+	system("pause");
+	return 0;
+}
+...
