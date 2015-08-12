@@ -23,7 +23,7 @@
     <meta property="og:description" content="First Impressions: A quick run of the program shows us that it&amp;#8217;s a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. The readme.txt file tells us that the crackme is..." />
     <meta property="og:url" content="https://reversergeek.github.io/2015/08/12/Reverse-Engineering-Crackme_v2-Write-Up.html" />
     <meta property="article:published_time" content="2015-08-11T23:00:00.000Z" />
-    <meta property="article:modified_time" content="2015-08-12T16:14:14.579Z" />
+    <meta property="article:modified_time" content="2015-08-12T16:18:56.990Z" />
     
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Reverse Engineering Crackme_v2 Write Up." />
@@ -43,7 +43,7 @@
     "headline": "Reverse Engineering Crackme_v2 Write Up.",
     "url": "https://reversergeek.github.io/2015/08/12/Reverse-Engineering-Crackme_v2-Write-Up.html",
     "datePublished": "2015-08-11T23:00:00.000Z",
-    "dateModified": "2015-08-12T16:14:14.579Z",
+    "dateModified": "2015-08-12T16:18:56.990Z",
     "description": "First Impressions: A quick run of the program shows us that it&amp;#8217;s a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. The readme.txt file tells us that the crackme is..."
 }
     </script>
@@ -94,11 +94,11 @@
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="http://imgur.com/usthcIT.png" alt="usthcIT.png">
+<img src="http://imgur.com/z9tJiMs.png" alt="z9tJiMs.png">
 </div>
 </div>
 <div class="paragraph">
-<p>Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being comming from std:cin being stored in var_108 and var_208 respectivley. I&#8217;ll rename those variables szName and szSerial.</p>
+<p>Opening in IDA shows us the code the same strings that we saw in the command line being passed to std:cout and name and serial being comming from std:cin being stored in <code>var_108</code> and <code>var_208</code> respectivley. I&#8217;ll rename those variables <code>szName</code> and <code>szSerial</code>.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -110,64 +110,64 @@
 <h3 id="_reverse_engineering_serial_checking_algorithem">Reverse Engineering Serial Checking Algorithem:</h3>
 <div class="imageblock">
 <div class="content">
-<img src="http://imgur.com/z9tJiMs.png" alt="z9tJiMs.png">
+<img src="http://imgur.com/usthcIT.png" alt="usthcIT.png">
 </div>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">You can see in the image above (still in the main function, just scrolled down a little) that this crackme&#8217;s has only one conditional branch that leads to either "Error :: Not a correct Serial\n" and "Correct </dt>
+<dt class="hdlist1">You can see in the image above (still in the main function, just scrolled down a little) that this crackme&#8217;s has only one conditional branch that leads to either `"Error :: Not a correct Serial\n" and "Correct </dt>
 <dd>
-<p>Good Work\n".</p>
+<p>Good Work\n"`.</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>The code leading up the cmp and jmp that make that conditional branch will be the algorithem that checks to see if the serial and name are correct. Let&#8217;s have a look at it, shall we:</p>
+<p>The code leading up the <code>cmp</code> and <code>jmp</code> that make that conditional branch will be the algorithem that checks to see if the serial and name are correct. Let&#8217;s have a look at it, shall we:</p>
 </div>
 <div class="paragraph">
-<p>First the length of szName is determined with strlen():</p>
+<p>First the length of <code>szName</code> is determined with <code>strlen()</code>:</p>
 </div>
-<div class="paragraph">
-<p>&#8230;&#8203;
-lea     eax, [ebp+szName]
+<div class="literalblock">
+<div class="content">
+<pre>lea     eax, [ebp+szName]
 mov     [esp], eax      ; char *
-call    _strlen
-&#8230;&#8203;</p>
+call    _strlen</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Next the length is multiplied by 0x875CD (554445d) and again by 0x51eb851f (1374389535d) but this time the result goes into the EDX:EAX register pair.  EAX is them moved into EDX, nulling the least significant half of the quad word, effectively dividing by 0x64 which is 2**32:</p>
+<p>Next the length is multiplied by <code>0x875CD</code> (554445d) and again by <code>0x51eb851f</code> (1374389535d) but this time the result goes into the EDX:EAX register pair.  <code>eax</code> is them moved into <code>edx</code>, nulling the least significant half of the quad word, effectively dividing by <code>0x64</code> which is 2**32:</p>
 </div>
-<div class="paragraph">
-<p>&#8230;&#8203;
-mov     edx, eax
+<div class="literalblock">
+<div class="content">
+<pre>mov     edx, eax
 imul    edx, 875CDh
 mov     eax, 51EB851Fh
 mul     edx
-mov     eax, edx
-&#8230;&#8203;</p>
+mov     eax, edx</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>Shift right is used to divide by 2**5, ie 32:</p>
 </div>
-<div class="paragraph">
-<p>&#8230;&#8203;
-shr     eax, 5
-&#8230;&#8203;</p>
+<div class="literalblock">
+<div class="content">
+<pre>shr     eax, 5</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Then multiplication by 0x0FFFFFC90 which is -880d:</p>
+<p>Then multiplication by <code>0x0FFFFFC90</code> which is -880d:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>imul    eax, 0FFFFFC90h</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;
-imul    eax, 0FFFFFC90h
-&#8230;&#8203;</p>
+<p>Next <code>_sprintf</code> is used to convert the floating point into a string with "-x019871" appended to it. Eg: -50.0 becomes "-50-x019871". This is what the serial needs to be. If you were stepping though with a debugger then you would see desired serial in <code>var_308</code>.</p>
 </div>
-<div class="paragraph">
-<p>Next _sprintf is used to convert the floating point into a string with "-x019871" appended to it. Eg: -50.0 becomes "-50-x019871". This is what the serial needs to be. If you were stepping though with a debugger then you would see desired serial in var_308.</p>
-</div>
-<div class="paragraph">
-<p>&#8230;&#8203;
-mov     edx, 0
+<div class="literalblock">
+<div class="content">
+<pre>mov     edx, 0
 push    edx
 push    eax
 fild    qword ptr [esp]
@@ -178,80 +178,74 @@ fstp    qword ptr [esp+8]
 mov     dword ptr [esp+4], offset aIX019871 ; "%i-x019871"
 lea     eax, [ebp+var_308]
 mov     [esp], eax      ; char *
-call    _sprintf
-&#8230;&#8203;</p>
+call    _sprintf</pre>
 </div>
-<div class="paragraph">
-<p>&#8230;&#8203;
-lea     eax, [ebp+var_308]
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>lea     eax, [ebp+var_308]
 mov     [esp+4], eax    ; char *
 lea     eax, [ebp+szSerial]
 mov     [esp], eax      ; char *
 call    _strcmp
 mov     [ebp+var_414], eax
 cmp     [ebp+var_414], 0
-jz      short loc_401719
-&#8230;&#8203;</p>
+jz      short loc_401719</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Putting that all together we get the following equation:
-&#8230;&#8203;
-int2str(((strlen(name) * 554445) * 1374389535 ) /(2**32 /32 ) * -880) + "-x019871"
-&#8230;&#8203;
-A bit of maths&#8230;&#8203;</p>
+<p>Putting that all together we get the following equation:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>int2str(((((strlen(name) * 554445) * 1374389535 ) /(2**32)) /32 ) * -880) + "-x019871"</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;
-1374389535/(2**32)/32
-=1/100
-&#8230;&#8203;
-can simplify the equation into:</p>
+<p>A bit of maths&#8230;&#8203;.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>1374389535/(2**32)/32
+=1/100</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;
-((strlen(name) * 554445  / 100) * -880)
-&#8230;&#8203;
-And there&#8217;s our keygen algorithem. We could just get the output of sprintf or type up a keygen in our language of choosing.</p>
+<p>can simplify the equation into:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>((strlen(name) * 554445  / 100) * -880)</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;
-#include &lt;iostream&gt;
+<p>And there&#8217;s our keygen algorithem. We could just get the output of sprintf or type up a keygen in our language of choosing.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>#include &lt;iostream&gt;
 #include &lt;iomanip&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;stdio.h&gt;
-#include &lt;string.h&gt;</p>
-</div>
-<div class="paragraph">
-<p>using namespace std;</p>
-</div>
-<div class="paragraph">
-<p>int main(int argc, char *argv[]) {
-	char name[100];
-	double serial_number;</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>cout &lt;&lt; "name: ";
-cin &gt;&gt; setw(sizeof name) &gt;&gt; name;</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>serial_number = (long double)(-880 * (554445 * strlen(name) / 0x64));</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>printf("%i-x019871\n", serial_number);
-//cout &lt;&lt; "Hellow world" &lt;&lt; endl;</pre>
-</div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>	system("pause");
-	return 0;
-}
-...</pre>
+#include &lt;string.h&gt;
+
+using namespace std;
+
+int main(int argc, char *argv[]) {
+    char name[100];
+    double serial_number;
+
+    cout &lt;&lt; "name: ";
+    cin &gt;&gt; setw(sizeof name) &gt;&gt; name;
+
+    serial_number = (long double)(-880 * (554445 * strlen(name) / 0x64));
+
+    printf("%i-x019871\n", serial_number);
+    //cout &lt;&lt; "Hellow world" &lt;&lt; endl;
+
+    system("pause");
+    return 0;
+}</pre>
 </div>
 </div>
 </div>
