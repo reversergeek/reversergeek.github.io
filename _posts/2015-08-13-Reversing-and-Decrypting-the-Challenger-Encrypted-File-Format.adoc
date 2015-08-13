@@ -30,8 +30,28 @@ You can see the green bytes are the same and the yellow bytes are different. You
 
 Let's see what happens if we encrypt the same file with two different keys.
 
+image::http://i.imgur.com/4MtvTxH.png[]
 
+This time different information changes and different information stays the same between the two compared files.
 
+Thirdly we'll se if there's any difference in the .cha files produced by encrypting the same file twice with the same key.
+
+image::http://i.imgur.com/zYlWDaK.png[]
+
+So some bytes always stay the same. Some bytes always change. Some bytes only change with different keys. And some bytes change with different files.
+
+In summary, according to analysis of the few files I've made in this one virtual machine:
+
+* The first 24 bytes are allways the same.
+* The following 4 bytes are different in every file.
+* The following 8 bytes are the same in every file.
+* The following 8 bytes are the different if there are different keys.
+* The following 12 bytes are different in every file.
+* The following 2 bytes are different if the file or key is different.
+* The following 3 bytes are the same in every file.
+* The following 4 bytes are the diffrent if there are different keys.
+* The following 3 bytes are the same in every file.
+* The following 
 
 
 
@@ -47,10 +67,7 @@ What if we just encrypt the same txt file twice with the same key?
 
 image::http://i.imgur.com/XihgfMW.png[]
 
-So some bytes always stay the same. Some bytes always change. Some bytes only change with different keys. And some bytes change with different files.
 
-* All files have the same first 24 bytes.
-* The following 4 bytes are different in every file.
 
 
 
