@@ -1,4 +1,4 @@
-= Reversing and Decrypting the Challenger Encrypted File Format:
+= Reversing and Decrypting the Challenger Encrypted File Format
 
 To demonstrate that I can decrypt encrypted, proprietary file formats I have 
 
@@ -6,20 +6,7 @@ To demonstrate that I can decrypt encrypted, proprietary file formats I have
 The software I've picked is named "Challenger". The challenge is to imagine that Challenger's trial licence has expired and you can no-longer use the software. The passwords/keys are known, however (we're not breaking AES here :p).
 
 
-First checks with PEiD show no signature for a compiler or packer (so it could be packed), it also fails to find any crypto signatures other than CRC32
-
-
-When we first run the program it asks us to enter a password start password. The crypto key will be generated from this password.
-
-image::http://i.imgur.com/cJgPvZE.png[]
-
-Next we can see a button labelled "Encrypt/Decrypt file...". When we click it we get a open file dialogue. I wonder if that's a secure erase or just a deletion, but let's not go off on to a tangent.
-
-image::http://i.imgur.com/b6N1JC5.png[]
-
-After selecting the file there's a dialogue with a button 'Encrypt'. When we click that button Challenger creates and encrypted copy of our file and deletes the old one.
-
-image::http://i.imgur.com/7OZhY5I.png[]
+== Analysing the Files
 
 
 I encrypted my copy of PEiD.exe and it produced PEiD.exe.cha. I also encrypted a  readme.txt file which produced readme.cha. Both encrypted .cha files are 71 bytes larger than their origionals. This suggests a 71 byte header. Let's look at them in a hex dump and compare them.
@@ -54,30 +41,40 @@ In summary, according to analysis of the few files I've made in this one virtual
 * The following x bytes are clearly a copy of the plaintext's file extention and will be as long as that file extention is (I checked by encrypting a file with a 6 letter extention).
 * The following bytes are all variable and must be the ciphertext.
 
+That's everything we can tell from the files. Let's do some debugging...
+
+== Reverse Engineering the Binary
+
+First checks with PEiD show no signature for a compiler or packer (so it could be packed), it also fails to find any crypto signatures other than CRC32
 
 
+When we first run the program it asks us to enter a password start password. The crypto key will be generated from this password.
 
+image::http://i.imgur.com/cJgPvZE.png[]
 
+Next we can see a button labelled "Encrypt/Decrypt file...". When we click it we get a open file dialogue. I wonder if that's a secure erase or just a deletion, but let's not go off on to a tangent.
 
+image::http://i.imgur.com/b6N1JC5.png[]
 
-If we go though the same dialogues again, but this time select the encrypted file, Challenger will decrypt our file.
+After selecting the file there's a dialogue with a button 'Encrypt'. When we click that button Challenger creates and encrypted copy of our file and deletes the old one.
 
+image::http://i.imgur.com/7OZhY5I.png[]
+
+If we go though the same dialogues again, but this time select the encrypted file, Challenger will give us an active' 'decrypt' button. 
 
 image::http://i.imgur.com/3LqFPpu.png[]
 
-You can also see the file name in EDI and ESP (yes I'm encrypting PEiD.exe).
-
-This function hasn't taken ups to the  I decided to put breakpoints on all intermodular calls to CreateFile and ReadFile and continue to run the process.
+It's likely that the very next thing that Challenger will do is to open the file, read it, and decrypt it. By putting breakpoints on all intermodular calls to CreateFile and ReadFile and clicking that button it's lkley that one of the first breakpoints .
 
 image::http://i.imgur.com/vLdAsqA.png[]
 
 Bamm! We hit the exact call that we wanted. Looks like this is in a very important routine, too.
 
-There are two ReadFile's after CreateFileW opens it. The first only reads a hardcoded 68 bytes (probably a header), the second read 3 bytes. That number 3 isn't hardcoded, it was a byte in the 68 bytes and, since those 3 bytes are ('exe'), probably indicates the length of the file extension of the plaintext file.
+There are two ReadFile's after CreateFileW opens the file. The first only reads a hardcoded 68 bytes (the header), the second reads 3 bytes - the file extention.
 
 <img7+7>
-Since the second ReadFile doesn't read from the beginning I've decided to follow the same steps again with breakpoints on intermodular calls to SetFilePointer aswell. We get the same sequence of calls. Looking at the hex dump the 'exe' starts after 68 bytes, so the filepointer isn't be changed by SetFilePointer, it's just the next few bytes.
 
+The next ReadFile 
 
 The next CreateFileW creates the new plaintext file (based on the file path+name with the .cha file extension (or .ch2) removed and the original extension ('exe' in this case) on the end (if it wouldn't be already).
 
