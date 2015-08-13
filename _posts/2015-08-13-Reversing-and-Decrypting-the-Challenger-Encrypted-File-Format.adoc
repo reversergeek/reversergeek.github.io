@@ -74,7 +74,9 @@ There are two ReadFile's after CreateFileW opens the file. The first only reads 
 
 <img7+7>
 
-TODO: use hardware breakpoints on the cipher text to find all reads from it. Look at the refrence graphs from IDA to see how deep the functions calls go, then step though them giving 
+TODO: use hardware breakpoints on the cipher text to find all reads from it. Look at the refrence graphs from IDA to see how deep the functions calls go, then step though them giving IDA 
+
+-You could have had the idea to ask reddit about the crypto function using the problem solving technique.
 
 The next ReadFile 
 
