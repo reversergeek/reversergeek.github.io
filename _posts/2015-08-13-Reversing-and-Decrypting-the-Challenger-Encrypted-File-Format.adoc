@@ -64,7 +64,7 @@ If we go though the same dialogues again, but this time select the encrypted fil
 
 image::http://i.imgur.com/3LqFPpu.png[]
 
-It's likely that the very next thing that Challenger will do is to open the file, read it, and decrypt it. By putting breakpoints on all intermodular calls to CreateFile and ReadFile and clicking that button it's lkley that one of the first breakpoints .
+It's likely that the very next thing that Challenger will do is to open the file, read it, and decrypt it. By putting breakpoints on all intermodular calls to CreateFile and ReadFile and clicking that button it's likley that one of the first breakpoints .
 
 image::http://i.imgur.com/vLdAsqA.png[]
 
@@ -74,11 +74,14 @@ There are two ReadFile's after CreateFileW opens the file. The first only reads 
 
 <img7+7>
 
+TODO: use hardware breakpoints on the cipher text to find all reads from it. Look at the refrence graphs from IDA to see how deep the functions calls go, then step though them giving 
+
 The next ReadFile 
 
 The next CreateFileW creates the new plaintext file (based on the file path+name with the .cha file extension (or .ch2) removed and the original extension ('exe' in this case) on the end (if it wouldn't be already).
 
 <img8>
+
 The third Readfile 
 
 
