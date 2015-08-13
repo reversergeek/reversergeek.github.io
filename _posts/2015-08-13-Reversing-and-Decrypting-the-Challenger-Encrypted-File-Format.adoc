@@ -1,0 +1,81 @@
+= Reversing and Decrypting the Challenger Encrypted File Format:
+
+To demonstrate that I can decrypt encrypted, proprietary file formats I have 
+
+
+The software I've picked is named "Challenger". The challenge is to imagine that Challenger's trial licence has expired and you can no-longer use the software. The passwords/keys are known, however (we're not breaking AES here :p).
+
+
+First checks with PEiD show no signature for a compiler or packer (so it could be packed), it also fails to find any crypto signatures other than CRC32
+
+
+When we first run the program it asks us to enter a password start password. The crypto key will be generated from this password.
+
+image::http://i.imgur.com/cJgPvZE.png[]
+
+Next we can see a button labelled "Encrypt/Decrypt file...". When we click it we get a open file dialogue. I wonder if that's a secure erase or just a deletion, but let's not go off on to a tangent.
+
+image::http://i.imgur.com/b6N1JC5.png[]
+
+After selecting the file there's a dialogue with a button 'Encrypt'. When we click that button Challenger creates and encrypted copy of our file and deletes the old one.
+
+image::http://i.imgur.com/7OZhY5I.png[]
+
+
+I encrypted my copy of PEiD.exe and it produced PEiD.exe.cha. I also encrypted a  readme.txt file which produced readme.cha. Both encrypted .cha files are 71 bytes larger than their origionals. This suggests a 71 byte header. Let's look at them in a hex dump and compare them.
+
+image::http://i.imgur.com/Bo5zJYS.png[]
+
+You can see the green bytes are the same and the yellow bytes are different. You can also see that the last 3 bytes of the 71 bytes header denotes the file plaintext file's file extention.
+
+Let's see what happens if we encrypt the same file with two different keys.
+
+
+
+
+
+
+I encrypted my copy of PEiD.exe and it produced PEiD.exe.cha. I also encrypted random .cpp file that I had lying around. Both encrypted .cha files are 71 bytes larger than their origionals. This suggests a 71 byte header. Let's look at them in a hex dump and compare them.
+
+image::http://i.imgur.com/Rue2Sgj.png[]
+
+Now let's encrypt PEiD.exe with different key and compare the encrypted file with our first encrypted PEiD.exe.
+
+image::http://i.imgur.com/wbxE7By.png[]
+
+What if we just encrypt the same txt file twice with the same key?
+
+image::http://i.imgur.com/XihgfMW.png[]
+
+So some bytes always stay the same. Some bytes always change. Some bytes only change with different keys. And some bytes change with different files.
+
+* All files have the same first 24 bytes.
+* The following 4 bytes are different in every file.
+
+
+
+If we go though the same dialogues again, but this time select the encrypted file, Challenger will decrypt our file.
+
+
+image::http://i.imgur.com/3LqFPpu.png[]
+
+You can also see the file name in EDI and ESP (yes I'm encrypting PEiD.exe).
+
+This function hasn't taken ups to the  I decided to put breakpoints on all intermodular calls to CreateFile and ReadFile and continue to run the process.
+
+image::http://i.imgur.com/vLdAsqA.png[]
+
+Bamm! We hit the exact call that we wanted. Looks like this is in a very important routine, too.
+
+There are two ReadFile's after CreateFileW opens it. The first only reads a hardcoded 68 bytes (probably a header), the second read 3 bytes. That number 3 isn't hardcoded, it was a byte in the 68 bytes and, since those 3 bytes are ('exe'), probably indicates the length of the file extension of the plaintext file.
+
+<img7+7>
+Since the second ReadFile doesn't read from the beginning I've decided to follow the same steps again with breakpoints on intermodular calls to SetFilePointer aswell. We get the same sequence of calls. Looking at the hex dump the 'exe' starts after 68 bytes, so the filepointer isn't be changed by SetFilePointer, it's just the next few bytes.
+
+
+The next CreateFileW creates the new plaintext file (based on the file path+name with the .cha file extension (or .ch2) removed and the original extension ('exe' in this case) on the end (if it wouldn't be already).
+
+<img8>
+The third Readfile 
+
+
