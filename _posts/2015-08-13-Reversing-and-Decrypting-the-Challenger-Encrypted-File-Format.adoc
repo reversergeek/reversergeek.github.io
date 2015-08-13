@@ -34,7 +34,7 @@ image::http://i.imgur.com/4MtvTxH.png[]
 
 This time different information changes and different information stays the same between the two compared files.
 
-Thirdly we'll se if there's any difference in the .cha files produced by encrypting the same file twice with the same key.
+Thirdly we'll see if there's any difference in the .cha files produced by encrypting the same file twice with the same key.
 
 image::http://i.imgur.com/zYlWDaK.png[]
 
@@ -51,21 +51,10 @@ In summary, according to analysis of the few files I've made in this one virtual
 * The following 3 bytes are the same in every file.
 * The following 4 bytes are the diffrent if there are different keys.
 * The following 3 bytes are the same in every file.
-* The following 
+* The following x bytes are clearly a copy of the plaintext's file extention and will be as long as that file extention is (I checked by encrypting a file with a 6 letter extention).
+* The following bytes are all variable and must be the ciphertext.
 
 
-
-I encrypted my copy of PEiD.exe and it produced PEiD.exe.cha. I also encrypted random .cpp file that I had lying around. Both encrypted .cha files are 71 bytes larger than their origionals. This suggests a 71 byte header. Let's look at them in a hex dump and compare them.
-
-image::http://i.imgur.com/Rue2Sgj.png[]
-
-Now let's encrypt PEiD.exe with different key and compare the encrypted file with our first encrypted PEiD.exe.
-
-image::http://i.imgur.com/wbxE7By.png[]
-
-What if we just encrypt the same txt file twice with the same key?
-
-image::http://i.imgur.com/XihgfMW.png[]
 
 
 
