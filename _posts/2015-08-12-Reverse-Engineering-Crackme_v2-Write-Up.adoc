@@ -6,22 +6,21 @@ Crackmes are free, reverse engineering challenges made by reversers for others p
 
 A quick run of the program shows us that it's a command line program. The crackme outputs some strings and takes 2 inputs: serial, and name. 
 
-image::http://imgur.com/GrpOB7j.png[]
+image::lu1.105.png[]
 
 The readme.txt file tells us that the crackme is written in C++ and our goal is to write a keygen, not patch the software.
-
 A PEiD scan detects no packer/crypter signatures.
 
-image::http://imgur.com/z9tJiMs.png[]
+image::lu2.107.png[]
 
 
 Opening in IDA shows us code with the same strings that we saw in the command line being passed to `std:cout` and name and serial, coming from `std:cin`, being stored in `var_108` and `var_208` respectively. I'll rename those variables `szName` and `szSerial`.
 
-image::http://imgur.com/UdRo9CK.png[]
+image::lu3.108.png[]
 
 === Reverse Engineering Serial Checking Algorithm:
 
-image::http://imgur.com/usthcIT.png[]
+image::lu4.109.png[]
 
 You can see in the image above (still in the main function, just scrolled down a little) that this crackme has only one conditional branch that leads to either ``"Error : : Not a correct Serial\n"` or `"Correct : : Good Work\n"`.
 
@@ -135,6 +134,6 @@ int main(int argc, char *argv[]) {
 
 Let's see if it works:
 
-image::http://i.imgur.com/X2l3uYB.png[]
+image::lu5.110.png[]
 
 Ta-daar! That's a success.
