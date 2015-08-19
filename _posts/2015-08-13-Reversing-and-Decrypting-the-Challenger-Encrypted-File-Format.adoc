@@ -1,52 +1,13 @@
 = Reversing and Decrypting the Challenger Encrypted File Format
 
-To demonstrate that I can decrypt encrypted, proprietary file formats I have 
+To demonstrate that I can decrypt encrypted, proprietary file formats I have created this write-up of me doing the same thing for a software application that I downloaded.
 
+The software I've picked is named "Challenger". The challenge is to pretend that Challenger decrypts encrypted files but does not save those files anywhere. We must extract the decrypted plaintext file by reverse engineering the software. The passwords/keys are known, however (we're not doing cryptanalysis here :p).
 
-The software I've picked is named "Challenger". The challenge is to imagine that Challenger's trial licence has expired and you can no-longer use the software. The passwords/keys are known, however (we're not breaking AES here :p).
-
-
-== Analysing the Files
-
-
-I encrypted my copy of PEiD.exe and it produced PEiD.exe.cha. I also encrypted a  readme.txt file which produced readme.cha. Both encrypted .cha files are 71 bytes larger than their origionals. This suggests a 71 byte header. Let's look at them in a hex dump and compare them.
-
-image::http://i.imgur.com/Bo5zJYS.png[]
-
-You can see the green bytes are the same and the yellow bytes are different. You can also see that the last 3 bytes of the 71 bytes header denotes the file plaintext file's file extention.
-
-Let's see what happens if we encrypt the same file with two different keys.
-
-image::http://i.imgur.com/4MtvTxH.png[]
-
-This time different information changes and different information stays the same between the two compared files.
-
-Thirdly we'll see if there's any difference in the .cha files produced by encrypting the same file twice with the same key.
-
-image::http://i.imgur.com/zYlWDaK.png[]
-
-So some bytes always stay the same. Some bytes always change. Some bytes only change with different keys. And some bytes change with different files.
-
-In summary, according to analysis of the few files I've made in this one virtual machine:
-
-* The first 24 bytes are allways the same.
-* The following 4 bytes are different in every file.
-* The following 8 bytes are the same in every file.
-* The following 8 bytes are the different if there are different keys.
-* The following 12 bytes are different in every file.
-* The following 2 bytes are different if the file or key is different.
-* The following 3 bytes are the same in every file.
-* The following 4 bytes are the diffrent if there are different keys.
-* The following 3 bytes are the same in every file.
-* The following x bytes are clearly a copy of the plaintext's file extention and will be as long as that file extention is (I checked by encrypting a file with a 6 letter extention).
-* The following bytes are all variable and must be the ciphertext.
-
-That's everything we can tell from the files. Let's do some debugging...
 
 == Reverse Engineering the Binary
 
-First checks with PEiD show no signature for a compiler or packer (so it could be packed), it also fails to find any crypto signatures other than CRC32
-
+First checks with PEiD show no signature for a compiler or packer, it also fails to find any crypto signatures other than CRC32
 
 When we first run the program it asks us to enter a password start password. The crypto key will be generated from this password.
 
@@ -64,26 +25,49 @@ If we go though the same dialogues again, but this time select the encrypted fil
 
 image::http://i.imgur.com/3LqFPpu.png[]
 
-It's likely that the very next thing that Challenger will do is to open the file, read it, and decrypt it. By putting breakpoints on all intermodular calls to CreateFile and ReadFile and clicking that button it's likley that one of the first breakpoints .
+It's likely that the very next thing that Challenger will do is to open the file, read it, and decrypt it. By putting breakpoints on all intermodular calls to CreateFile and ReadFile and clicking that button it's likley that one of the first breakpoints we hit will be opening our encrypted file.
 
 image::http://i.imgur.com/vLdAsqA.png[]
 
 Bamm! We hit the exact call that we wanted. Looks like this is in a very important routine, too.
 
-There are two ReadFile's after CreateFileW opens the file. The first only reads a hardcoded 68 bytes (the header), the second reads 3 bytes - the file extention.
+There are two ReadFile's after CreateFileW opens the file.
+* 00250192 The first only reads a hardcoded 68 bytes (the header).
+* the second reads 3 bytes - the file extention at the end of the header.
 
 <img7+7>
 
-TODO: use hardware breakpoints on the cipher text to find all reads from it. Look at the refrence graphs from IDA to see how deep the functions calls go, then step though them giving IDA the variable names. 
-
--You could have had the idea to ask reddit about the crypto function using the problem solving technique.
-
-The next ReadFile 
-
-The next CreateFileW creates the new plaintext file (based on the file path+name with the .cha file extension (or .ch2) removed and the original extension ('exe' in this case) on the end (if it wouldn't be already).
+Next we hit a CreateFileW which creates the new plaintext file. This is based on the ciphertext file's path+name with the .cha file extension (or .ch2) removed and the original extension ('exe' in this case) on the end (if it isn't already).
 
 <img8>
 
-The third Readfile 
+After this we get a third ReadFile at 002509F4. This ReadFile fills the buffer with the ciphertext from the file.
 
+<img10>
 
+I put a hardware breakpoint at the beginning of the ciphertext and ran the program. Let's see what happens.
+
+<img.bp1>
+
+This appears to be calculating a checksum of the cipher text. The checksum calculated was 961A47A7. The same checksum was found in little-endian byte order, 24 bytes from the start of the .cha file. 
+
+<img.bp2>
+
+We breakpoint on another function, this time the asm is copying a byte from the ciphertext into ecx and xoring it with a value from an a pointer to what may be a table plus an offset from another table This could be the cipher. Immunity's searchcrypt pycommand still gives us no recognised crypto signatures, however.
+
+I noted that both of these functions return to the same function, and that function is the same function that makes the call to ReadFile to get the ciphertext.
+
+<img.idaCrypto>
+
+So this function reads the ciphertext from the file, calculates a CRC32 checksum of it, decrypts it, and then writes the plaintext to a file. This is one of the most important functions.
+
+Stepping over the function the function with the cipher, that I've decided to name 'cipherUsedToDecrypt' it can be seen what when the funciton returns the cipher text, in it's buffer, has been replaced with the plaintext! Success! We can extract the plain text into a file!.
+
+<img.last1>
+
+TODO: 
+-step though read, crc32, crypt, write to finish the part 1 thing.
+-step though crypto function to see:
+ -where's the key
+ -what all of it's bits are doing.
+-You could have had the idea to ask reddit about the crypto function using the problem solving technique.
