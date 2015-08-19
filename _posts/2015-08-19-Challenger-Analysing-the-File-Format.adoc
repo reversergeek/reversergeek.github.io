@@ -1,0 +1,42 @@
+= Challenger Analysing the File Format
+
+== Analysing the Files
+
+I encrypted my copy of PEiD.exe and it produced PEiD.exe.cha. I also encrypted a  readme.txt file which produced readme.cha. Both encrypted .cha files are 71 bytes larger than their origionals. This suggests a 71 byte header. Let's look at them in a hex dump and compare them.
+
+image::http://i.imgur.com/Bo5zJYS.png[]
+
+These are binary files. You can see the green bytes are the same and the yellow bytes are different. You can also see that the last 3 bytes of the 71 bytes header denotes the file plaintext file's file extention.
+
+Let's see what happens if we encrypt the same file with two different keys.
+
+image::http://i.imgur.com/4MtvTxH.png[]
+
+This time different information changes and different information stays the same between the two compared files.
+
+Thirdly we'll see if there's any difference in the .cha files produced by encrypting the same file twice with the same key.
+
+image::http://i.imgur.com/zYlWDaK.png[]
+
+So some bytes always stay the same. Some bytes always change. Some bytes only change with different keys. And some bytes change with different files.
+
+In summary, according to analysis of the few files I've made in this one virtual machine:
+
+* The first 24 bytes are allways the same.
+* The following 4 bytes are different in every file.
+* The following 8 bytes are the same in every file.
+* The following 8 bytes are the different if there are different keys.
+* The following 12 bytes are different in every file.
+* The following 2 bytes are different if the file or key is different.
+* The following 3 bytes are the same in every file.
+* The following 4 bytes are the diffrent if there are different keys.
+* The following 3 bytes are the same in every file.
+* The following x bytes are clearly a copy of the plaintext's file extention and will be as long as that file extention is (I checked by encrypting a file with a 6 letter extention).
+* The following bytes are all variable and must be the ciphertext.
+
+We can get a clue as to what each set of bytes is doing by modifying them and seeing how the programs behaviour is different with the modified file. For example:
+* Modifying bytes in the first 16 (but not the following 8) bytes causes Challenger to offer to 'encrypt', rather than 'decrypt'. This must be because the file isn't recognised as a .cha file since the magic number that is recognised have been modified. This shows us that that magic number is the first 16 bytes.
+* 
+
+
+That's everything we can tell from the files. Let's do some debugging...
