@@ -11,23 +11,23 @@ First checks with PEiD show no signature for a compiler or packer, it also fails
 
 When we first run the program it asks us to enter a password start password. The crypto key will be generated from this password.
 
-image::http://i.imgur.com/cJgPvZE.png[]
+image::chall1.41.png[]
 
 Next we can see a button labelled "Encrypt/Decrypt file...". When we click it we get a open file dialogue. I wonder if that's a secure erase or just a deletion, but let's not go off on to a tangent.
 
-image::http://i.imgur.com/b6N1JC5.png[]
+image::chall1.40.png[]
 
 After selecting the file there's a dialogue with a button 'Encrypt'. When we click that button Challenger creates and encrypted copy of our file and deletes the old one.
 
-image::http://i.imgur.com/7OZhY5I.png[]
+image::chall1.39.png[]
 
 If we go though the same dialogues again, but this time select the encrypted file, Challenger will give us an active' 'decrypt' button. 
 
-image::http://i.imgur.com/3LqFPpu.png[]
+image::chall1.38.png[]
 
 It's likely that the very next thing that Challenger will do is to open the file, read it, and decrypt it. By putting breakpoints on all intermodular calls to CreateFile and ReadFile and clicking that button it's likley that one of the first breakpoints we hit will be opening our encrypted file.
 
-image::http://i.imgur.com/vLdAsqA.png[]
+image::chall1.46.png[]
 
 Bamm! We hit the exact call that we wanted. Looks like this is in a very important routine, too.
 
@@ -35,39 +35,33 @@ There are two ReadFile's after CreateFileW opens the file.
 * 00250192 The first only reads a hardcoded 68 bytes (the header).
 * the second reads 3 bytes - the file extention at the end of the header.
 
-<img7+7>
+image::chall6.48.png[]
+image::chall6.57.png[]
 
 Next we hit a CreateFileW which creates the new plaintext file. This is based on the ciphertext file's path+name with the .cha file extension (or .ch2) removed and the original extension ('exe' in this case) on the end (if it isn't already).
 
-<img8>
+image::chall8.58.png[]
 
 After this we get a third ReadFile at 002509F4. This ReadFile fills the buffer with the ciphertext from the file.
 
-<img10>
+image::chall8.59.png[]
 
 I put a hardware breakpoint at the beginning of the ciphertext and ran the program. Let's see what happens.
 
-<img.bp1>
+image::challx1.135.png[]
 
 This appears to be calculating a checksum of the cipher text. The checksum calculated was 961A47A7. The same checksum was found in little-endian byte order, 24 bytes from the start of the .cha file. 
 
-<img.bp2>
+image::challx1.139.png[]
 
 We breakpoint on another function, this time the asm is copying a byte from the ciphertext into ecx and xoring it with a value from an a pointer to what may be a table plus an offset from another table This could be the cipher. Immunity's searchcrypt pycommand still gives us no recognised crypto signatures, however.
 
 I noted that both of these functions return to the same function, and that function is the same function that makes the call to ReadFile to get the ciphertext.
 
-<img.idaCrypto>
-
 So this function reads the ciphertext from the file, calculates a CRC32 checksum of it, decrypts it, and then writes the plaintext to a file. This is one of the most important functions.
 
-Stepping over the function the function with the cipher, that I've decided to name 'cipherUsedToDecrypt' it can be seen what when the funciton returns the cipher text, in it's buffer, has been replaced with the plaintext! Success! We can extract the plain text into a file!.
+Stepping over the function the function with the cipher, that I've decided to name 'cipherUsedToDecrypt' it can be seen what when the funciton returns the cipher text, in it's buffer, has been replaced with the plaintext! *Success!* We can extract the plain text into a file!.
 
-<img.last1>
+image::challx1.140.png[]
 
-TODO: 
--step though read, crc32, crypt, write to finish the part 1 thing.
--step though crypto function to see:
- -where's the key
- -what all of it's bits are doing.
--You could have had the idea to ask reddit about the crypto function using the problem solving technique.
+
